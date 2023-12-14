@@ -6,6 +6,7 @@
             <button class="btn top-brand" @click="dismissInstall">Dismiss</button>
         </div>
     </div>
+    <button @click="getNoti">Subscribe to get Notifications</button>
 </template>
 
 <script>

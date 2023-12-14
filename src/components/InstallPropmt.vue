@@ -6,7 +6,17 @@
             <button class="btn top-brand" @click="dismissInstall">Dismiss</button>
         </div>
     </div>
-    <button @click="getNoti">Subscribe to get Notifications</button>
+    <!-- <button @click="getNoti">Subscribe to get Notifications</button> -->
+    <!-- Your new custom notification prompt -->
+    <div v-if="showCustomNotification" class="custom-notification">
+        <div class="custom-notification-content">
+            <p>This is a custom notification. Do you want to receive browser notifications?</p>
+            <button class="btn top-brand" @click="triggerDefaultNotification">Yes</button>
+            <button class="btn top-brand" @click="dismissCustomNotification">No</button>
+        </div>
+    </div>
+
+    <button @click="showCustomNotificationPrompt(); getNoti()">Subscribe to get Notifications</button>
 </template>
 
 <script>
@@ -18,6 +28,7 @@ export default {
             deferredPrompt: null,
             showInstallButton: false,
             showInstallPopup: false,
+            showCustomNotification: false,
         };
     },
     created() {
@@ -39,7 +50,7 @@ export default {
                     console.error(error)
                 })
         }
-        this.subscribeForNotifications()
+        // this.subscribeForNotifications()
     },
     methods: {
         handleInstallPrompt(event) {
@@ -65,32 +76,39 @@ export default {
         dismissInstall() {
             this.showInstallPopup = false;
         },
-        subscribeForNotifications() {
-            if ('serviceWorker' in navigator && 'PushManager' in window) {
-                navigator.serviceWorker.ready
-                    .then((registration) => {
-                        const subscribeOptions = {
-                            userVisibleOnly: true,
-                            applicationServerKey: "BHaGoupz6SaaiUM6EOTtsVSVjAklaOV3Y4lmexYmEV7XwDDiA4LkPLfqmvpaF4FcyyHEZ2LvLQUp9sHpuW0K96s"
-                        };
-                        return registration.pushManager.subscribe(subscribeOptions);
-                    })
-                    .then((pushSubscription) => {
-                        console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
-                        const { keys, endpoint } = pushSubscription.toJSON();
-                        localStorage.setItem('p256dhKey', keys.p256dh);
-                        localStorage.setItem('authKey', keys.auth);
-                        localStorage.setItem('endpoint', endpoint)
-                        console.log('Stored p256dhKey in localStorage:', keys.p256dh);
-                        console.log('Stored authKey in localStorage:', keys.auth);
-                    })
-                    .catch((error) => {
-                        console.error('Error subscribing for notifications:', error);
-                    });
-            } else {
-                console.warn('Push notifications are not supported in this browser.');
-            }
-        },
+        // subscribeForNotifications() {
+        //     if ('Notification' in window) {
+        //         Notification.requestPermission().then(permission => {
+        //             if (permission === 'granted') {
+        //                 if ('serviceWorker' in navigator && 'PushManager' in window) {
+        //                     navigator.serviceWorker.ready
+        //                         .then((registration) => {
+        //                             const subscribeOptions = {
+        //                                 userVisibleOnly: true,
+        //                                 applicationServerKey: "BHaGoupz6SaaiUM6EOTtsVSVjAklaOV3Y4lmexYmEV7XwDDiA4LkPLfqmvpaF4FcyyHEZ2LvLQUp9sHpuW0K96s"
+        //                             };
+        //                             return registration.pushManager.subscribe(subscribeOptions);
+        //                         })
+        //                         .then((pushSubscription) => {
+        //                             console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
+        //                             const { keys, endpoint } = pushSubscription.toJSON();
+        //                             localStorage.setItem('p256dhKey', keys.p256dh);
+        //                             localStorage.setItem('authKey', keys.auth);
+        //                             localStorage.setItem('endpoint', endpoint)
+        //                             console.log('Stored p256dhKey in localStorage:', keys.p256dh);
+        //                             console.log('Stored authKey in localStorage:', keys.auth);
+        //                         })
+        //                         .catch((error) => {
+        //                             console.error('Error subscribing for notifications:', error);
+        //                         });
+        //                 } else {
+        //                     console.warn('Push notifications are not supported in this browser.');
+        //                 }
+        //             }
+        //         });
+        //     }
+
+        // },
         getNoti() {
             const token = localStorage.getItem('token');
             const keys = {
@@ -111,6 +129,52 @@ export default {
                 .catch((error) => {
                     console.error('error sending data', error);
                 });
+        },
+        showCustomNotificationPrompt() {
+            // Display the custom notification prompt
+            this.showCustomNotification = true;
+            // this.triggerDefaultNotification().then(() => {
+            //     // After the first function is done, run the second function
+            //     this.getNoti();
+            // });
+        },
+        dismissCustomNotification() {
+            // Dismiss the custom notification prompt
+            this.showCustomNotification = false;
+        },
+        triggerDefaultNotification() {
+            // Trigger the default notification prompt
+            this.showCustomNotification = false; // Dismiss the custom prompt
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        if ('serviceWorker' in navigator && 'PushManager' in window) {
+                            navigator.serviceWorker.ready
+                                .then((registration) => {
+                                    const subscribeOptions = {
+                                        userVisibleOnly: true,
+                                        applicationServerKey: "BHaGoupz6SaaiUM6EOTtsVSVjAklaOV3Y4lmexYmEV7XwDDiA4LkPLfqmvpaF4FcyyHEZ2LvLQUp9sHpuW0K96s"
+                                    };
+                                    return registration.pushManager.subscribe(subscribeOptions);
+                                })
+                                .then((pushSubscription) => {
+                                    console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
+                                    const { keys, endpoint } = pushSubscription.toJSON();
+                                    localStorage.setItem('p256dhKey', keys.p256dh);
+                                    localStorage.setItem('authKey', keys.auth);
+                                    localStorage.setItem('endpoint', endpoint)
+                                    console.log('Stored p256dhKey in localStorage:', keys.p256dh);
+                                    console.log('Stored authKey in localStorage:', keys.auth);
+                                })
+                                .catch((error) => {
+                                    console.error('Error subscribing for notifications:', error);
+                                });
+                        } else {
+                            console.warn('Push notifications are not supported in this browser.');
+                        }
+                    }
+                });
+            }
         },
     }
 }
@@ -136,6 +200,29 @@ export default {
 }
 
 .install-popup button {
+    margin: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.custom-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s ease-in-out;
+}
+
+.custom-notification-content {
+    text-align: center;
+}
+
+.custom-notification button {
     margin: 10px;
     padding: 8px 16px;
     cursor: pointer;

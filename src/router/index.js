@@ -7,6 +7,11 @@ const routes = [
     name: "RootPage",
     component: () => import('@/views/RootPage.vue'),
   },
+  {
+    path: "/catalog-ledger",
+    name: "CatalogLedger",
+    component: () => import('@/views/CatalogLedger.vue'),
+  },
   ...authRoutes
 ];
 

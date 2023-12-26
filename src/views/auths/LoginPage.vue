@@ -23,6 +23,10 @@
                         v-model="password" required>
                     <label for="floatingInput2" class="text-muted">Password</label>
                 </div>
+                <div class="w-100 p-2 form-floating">
+                    <input type="text" class="form-control" id="floatingInput3" placeholder="type" v-model="type" required>
+                    <label for="floatingInput3" class="text-muted">Type</label>
+                </div>
                 <div class="d-flex justify-content-center align-items-center w-100 px-2 mt-2">
                     <button type="submit" class="btn text-white py-2 fs-5 w-100"
                         style="padding: 10px 12px !important;background: linear-gradient(113deg, #1FAB89 31%, #28CC9E 97%);">Submit</button>
@@ -60,14 +64,16 @@ export default {
         return {
             logo: "img/logo.png",
             publicPath: process.env.BASE_URL,
-            email: "",
-            password: "",
+            email: "fabricator@gmail.com",
+            password: "password",
+            type: "fabricator",
         };
     },
     methods: {
         loginAccount() {
-            axios.post('https://pwanew.clobug.co.in/api/login', {
-                email: this.email, password: this.password
+            // axios.post('https://pwanew.clobug.co.in/api/login', {
+            axios.post('http://192.168.1.133:8001/api/login', {
+                email: this.email, password: this.password, type: this.type
             }).then((response) => {
                 console.log('data sent', response)
                 const token = response.data.token;

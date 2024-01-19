@@ -6,8 +6,6 @@
             <button class="btn top-brand" @click="dismissInstall">Dismiss</button>
         </div>
     </div>
-    <!-- <button @click="getNoti">Subscribe to get Notifications</button> -->
-    <!-- Your new custom notification prompt -->
     <div v-if="showCustomNotification" class="custom-notification">
         <div class="custom-notification-content">
             <p>This is a custom notification. Do you want to receive browser notifications?</p>
@@ -76,39 +74,6 @@ export default {
         dismissInstall() {
             this.showInstallPopup = false;
         },
-        // subscribeForNotifications() {
-        //     if ('Notification' in window) {
-        //         Notification.requestPermission().then(permission => {
-        //             if (permission === 'granted') {
-        //                 if ('serviceWorker' in navigator && 'PushManager' in window) {
-        //                     navigator.serviceWorker.ready
-        //                         .then((registration) => {
-        //                             const subscribeOptions = {
-        //                                 userVisibleOnly: true,
-        //                                 applicationServerKey: "BHaGoupz6SaaiUM6EOTtsVSVjAklaOV3Y4lmexYmEV7XwDDiA4LkPLfqmvpaF4FcyyHEZ2LvLQUp9sHpuW0K96s"
-        //                             };
-        //                             return registration.pushManager.subscribe(subscribeOptions);
-        //                         })
-        //                         .then((pushSubscription) => {
-        //                             console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
-        //                             const { keys, endpoint } = pushSubscription.toJSON();
-        //                             localStorage.setItem('p256dhKey', keys.p256dh);
-        //                             localStorage.setItem('authKey', keys.auth);
-        //                             localStorage.setItem('endpoint', endpoint)
-        //                             console.log('Stored p256dhKey in localStorage:', keys.p256dh);
-        //                             console.log('Stored authKey in localStorage:', keys.auth);
-        //                         })
-        //                         .catch((error) => {
-        //                             console.error('Error subscribing for notifications:', error);
-        //                         });
-        //                 } else {
-        //                     console.warn('Push notifications are not supported in this browser.');
-        //                 }
-        //             }
-        //         });
-        //     }
-
-        // },
         getNoti() {
             const token = localStorage.getItem('token');
             const keys = {
@@ -131,19 +96,12 @@ export default {
                 });
         },
         showCustomNotificationPrompt() {
-            // Display the custom notification prompt
             this.showCustomNotification = true;
-            // this.triggerDefaultNotification().then(() => {
-            //     // After the first function is done, run the second function
-            //     this.getNoti();
-            // });
         },
         dismissCustomNotification() {
-            // Dismiss the custom notification prompt
             this.showCustomNotification = false;
         },
         triggerDefaultNotification() {
-            // Trigger the default notification prompt
             this.showCustomNotification = false; // Dismiss the custom prompt
             if ('Notification' in window) {
                 Notification.requestPermission().then(permission => {

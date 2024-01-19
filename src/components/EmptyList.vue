@@ -5,7 +5,7 @@
                 <i class="bi bi-search text-secondary fs-1" style="opacity: 60%;" ></i>
             </div>
             <div class="d-flex flex-fill flex-column ms-3">
-                <p class="fw-bold mb-0">No Orders Found</p>
+                <p class="fw-bold mb-0">{{title}}</p>
             </div>
 
         </div>
@@ -14,6 +14,8 @@
 
 <script>
 export default {
+    name:'EmptyList',
+    props:['title']
 }
 </script>
 

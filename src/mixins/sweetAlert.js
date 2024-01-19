@@ -26,7 +26,7 @@ const sweetAlert = {
                 showConfirmButton: false, // Hide the "OK" button when timer is set
                 confirmButtonText: 'OK'
             });
-        }
+        },
     }
 }
 export default sweetAlert

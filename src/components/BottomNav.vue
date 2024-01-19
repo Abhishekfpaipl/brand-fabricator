@@ -22,26 +22,35 @@ export default {
         return {
             links: [
                 {
-                    path: '/dashboard',
+                    path: '/new-orders',
                     icon: ' bi-journals',
-                    name: 'Job'
+                    name: 'Orders'
                 },
                 {
-                    path: '/material/accepted',
+                    path: '/purchase-orders',
                     icon: ' bi-stack',
-                    name: 'Material'
+                    name: 'Purchases'
                 },
                 {
-                    path: '/saleOrder/list',
+                    path: '/running-orders',
                     icon: ' bi-send',
-                    name: 'Ready'
+                    name: 'Running'
+                },
+                {
+                    path: '/dispatch-orders',
+                    icon: ' bi-box',
+                    name: 'Dispatches'
+                },
+                {
+                    path: '/sale-orders',
+                    icon: ' bi-graph-up-arrow',
+                    name: 'Sales'
                 },
             ]
         }
     },
     methods: {
         isLinkActive(link) {
-            // Check if the current route or any of its ancestors match the link's path
             return this.$route.matched.some((route) => {
                 return route.path === link.path || (route.path !== '/' && link.path.startsWith(route.path));
             });

@@ -1,4 +1,6 @@
 <template>
+    <router-link to="/login" class="btn top-brand d-flex justify-content-center m-2">Login</router-link>
+
     <div class="pb-5 mb-5">
         <ImageUploadBox></ImageUploadBox>
         <!-- <div class="text-center">
@@ -136,7 +138,7 @@
                 </div>
             </div>
             <div class="d-flex justify-content-center">
-                <button class="btn btn-danger">LogOut</button>
+                <button class="btn btn-danger" @click="logout">LogOut</button>
             </div>
         </div>
     </div>
@@ -144,7 +146,7 @@
 
 <script>
 import ImageUploadBox from '@/components/avatar/ImageUploadBox.vue';
-import axios from 'axios'
+// import axios from 'axios'
 export default {
     name: 'ProfilePage',
     components: { ImageUploadBox },
@@ -165,16 +167,12 @@ export default {
             bothCheckbox: false
         }
     },
-    mounted() {
-        this.supplierId = this.$route.params.supplierId
-        this.$store.dispatch('fetchSupplier', this.supplierId)
-    },
-    computed: {
-        supplier() {
-            return this.$store.getters.getSupplier;
-        }
-    },
     methods: {
+        logout() {
+            const token = localStorage.getItem('token')
+            console.log(token)
+            localStorage.removeItem(token)
+        },
         showForm() {
             this.isFormVisible = true;
         },
@@ -186,26 +184,26 @@ export default {
             this.state = '';
             this.zip = '';
         },
-        saveAddress() {
-            axios.post('http://192.168.1.183:8000/api/suppliers/' + this.supplierId, {
-                name: this.supplier.name,
-                whatsapp: this.supplier.whatsapp,
-                contact: this.supplier.contact,
-                mobile: this.supplier.contact,
-                email: this.supplier.email,
-                line1: this.supplier.shipping.line1,
-                line2: this.supplier.shipping.line2,
-                city: this.supplier.shipping.city,
-                state: this.supplier.shipping.state,
-                pincode: this.supplier.shipping.pincode,
-            })
-                .then(response => {
-                    console.log('Data successfully sent:', response.data);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
+        // saveAddress() {
+        //     axios.post('http://192.168.1.183:8000/api/suppliers/' + this.supplierId, {
+        //         name: this.supplier.name,
+        //         whatsapp: this.supplier.whatsapp,
+        //         contact: this.supplier.contact,
+        //         mobile: this.supplier.contact,
+        //         email: this.supplier.email,
+        //         line1: this.supplier.shipping.line1,
+        //         line2: this.supplier.shipping.line2,
+        //         city: this.supplier.shipping.city,
+        //         state: this.supplier.shipping.state,
+        //         pincode: this.supplier.shipping.pincode,
+        //     })
+        //         .then(response => {
+        //             console.log('Data successfully sent:', response.data);
+        //         })
+        //         .catch(error => {
+        //             console.error('Error:', error);
+        //         });
+        // }
     }
 }
 </script>

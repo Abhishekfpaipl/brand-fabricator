@@ -4,59 +4,68 @@ import authRoutes from './auth'
 const routes = [
   {
     path: "/",
-    name: "RootPage",
-    component: () => import('@/views/RootPage.vue'),
+    name: "HomePage",
+    component: () => import('@/pages/HomePage.vue'),
   },
   {
     path: "/dashboard",
-    name: "PurchaseOrders",
-    component: () => import('@/views/DashboardPage.vue'),
-    children: []
+    name: "MyDashboard",
+    component: () => import('@/pages/MyDashboard.vue'),
   },
   {
-    path: "/material",
+    path: "/",
+    component: () => import('@/AppLayout.vue'),
     children: [
       {
-        path: "accepted",
-        name: "MaterialAccepted",
-        component: () => import('@/views//material/MaterialAccepted.vue'),
+        path: "/new-orders",
+        name: "NewOrders",
+        component: () => import('@/pages/NewOrders.vue'),
+        children: []
       },
       {
-        path: "procurement/:poId",
-        name: "MaterialProcurement",
-        component: () => import('@/views/material/MaterialProcurement.vue'),
-      }
-    ]
+        path: "/purchase-orders",
+        name: "NewPurchase",
+        component: () => import('@/pages/NewPurchase.vue'),
+    
+      },
+      {
+        path: "/running-orders",
+        children: [
+          {
+            path: "",
+            name: "RunningOrders",
+            component: () => import('@/pages/RunningOrders.vue'),
+          },
+          {
+            path: ":ledger_sid",
+            name: "RunningOrderLedger",
+            component: () => import('@/pages/RunningOrderLedger.vue'),
+          },
+        ]
+      },
+      {
+        path: "/dispatch-orders",
+        name: "DispatchOrders",
+        component: () => import('@/pages/DispatchOrders.vue'),
+    
+      },
+      {
+        path: "/sale-orders",
+        name: "MySales",
+        component: () => import('@/pages/MySales.vue'),
+    
+      },
+      {
+        path: "/profile",
+        name: "MyProfile",
+        component: () => import('@/pages/MyProfile.vue'),
+      },
+    ],
   },
   {
-    path: "/saleOrder",
-    children: [
-      {
-        path: "list",
-        name: "ReadyCatalogList",
-        component: () => import('@/views/saleOrders/SaleOrderList.vue'),
-      },
-      {
-        path: "detail-page/:purchaseId",
-        name: "SaleOrderDetail",
-        component: () => import('@/views/saleOrders/SaleOrderDetail.vue'),
-      },
-      {
-        path: "preview-page/:purchaseId",
-        name: "SaleOrderPreview",
-        component: () => import('@/views/saleOrders/SaleOrderPreviewPage.vue'),
-      },
-      {
-        path: "catalog-ledger/:catalogId",
-        name: "CatalogLedger",
-        component: () => import('@/views/CatalogLedger.vue'),
-      },
-    ]
-  },
-  {
-    path: "/profile",
-    name: "Profile Page",
-    component: () => import('@/views/ProfilePage.vue'),
+    path: "/running-orders/:ledger_sid/chats",
+    name: "LedgerChats",
+    component: () => import('@/pages/LedgerChats.vue'),
   },
   ...authRoutes
 ];

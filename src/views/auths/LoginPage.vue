@@ -14,74 +14,79 @@
             <p class="text-center fs-5">Login Your Account </p>
             <form @submit.prevent="loginAccount()">
                 <div class="w-100 p-2 form-floating">
-                    <input type="email" class="form-control" id="floatingInput" placeholder="Email" v-model="email"
-                        required>
-                    <label for="floatingInput" class="text-muted">Enter your Email</label>
+                    <input type="tel" class="form-control" placeholder="Mobile" v-model="mobile">
+                    <label for="floatingInput" class="text-muted">Mobile No.</label>
+                </div>
+                <span>OR</span>
+                <div class="w-100 p-2 form-floating">
+                    <input type="email" class="form-control" placeholder="Email" v-model="email">
+                    <label for="floatingInput" class="text-muted">Email Id.</label>
                 </div>
                 <div class="w-100 p-2 form-floating">
                     <input type="password" class="form-control" id="floatingInput2" placeholder="Password"
                         v-model="password" required>
                     <label for="floatingInput2" class="text-muted">Password</label>
                 </div>
-                <div class="w-100 p-2 form-floating">
-                    <input type="text" class="form-control" id="floatingInput3" placeholder="type" v-model="type" required>
-                    <label for="floatingInput3" class="text-muted">Type</label>
-                </div>
                 <div class="d-flex justify-content-center align-items-center w-100 px-2 mt-2">
                     <button type="submit" class="btn text-white py-2 fs-5 w-100"
                         style="padding: 10px 12px !important;background: linear-gradient(113deg, #1FAB89 31%, #28CC9E 97%);">Submit</button>
                 </div>
             </form>
-
-            <!-- <RouterLink to="/forgot-password-page" style="text-decoration: none;">
-                <div class="text-end mt-1">
-                    Forgot your password?
-                </div>
-            </RouterLink> -->
-
             <div class="text-center container my-3">
                 <p>By proceeding, you agree to <RouterLink to="/">Terms & Conditions</RouterLink> & <RouterLink to="/">
                         Privacy policy</RouterLink>
                 </p>
             </div>
-            <!-- <div class="d-flex justify-content-center p-2">
-                <router-link to="/registration-page" class="w-100 rounded"
-                    style="box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;">
-                    <button class="btn w-100 fs-5 text-white"
-                        style="background: linear-gradient(113deg, #1FAB89  31%,  #28CC9E 97%);padding: 14px 12px ;">
-                        Click here for Register
-                    </button>
-                </router-link>
-            </div> -->
         </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios';
+import axiosInstance from '@/axiosInstance';
+// import Cookies from 'js-cookies';
+
 export default {
     data() {
         return {
             logo: "img/logo.png",
             publicPath: process.env.BASE_URL,
-            email: "fabricator@gmail.com",
+            email: null,
+            mobile: null,
             password: "password",
-            type: "fabricator",
+            type: null,
+            // type: "fabricator",
         };
     },
     methods: {
         loginAccount() {
-            // axios.post('https://pwanew.clobug.co.in/api/login', {
-            axios.post('http://192.168.1.133:8001/api/login', {
-                email: this.email, password: this.password, type: this.type
-            }).then((response) => {
-                console.log('data sent', response)
-                const token = response.data.token;
-                localStorage.setItem('token', token);
-                console.log('login succesful token stored', token)
-            }).catch((error) => {
-                console.log('error', error)
-            })
+
+            if (this.email && this.email !== '') {
+                this.type = 'email';
+            }
+
+            if (this.mobile && this.mobile !== '') {
+                this.type = 'mobile';
+            }
+
+            if (this.type) {
+                axiosInstance.post('login', {
+                    email: this.email, mobile: this.mobile, password: this.password, type: this.type, device: 'Abhishek'
+                }).then((response) => {
+                    console.log('data sent', response)
+                    const token = response.data.data.token;
+
+                    // Replace localStorage with Cookies.set
+                    // Cookies.set('token', token, { expires: 7, path: '/' });
+                    localStorage.setItem('token', token)
+                    console.log('login successful token stored', token)
+                    // this.$router.push('/dashboard');
+                }).catch((error) => {
+                    console.log('error', error)
+                })
+            } else {
+                alert('Either Mobile or Email is required');
+            }
         }
     }
 }

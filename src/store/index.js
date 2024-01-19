@@ -1,90 +1,60 @@
-import axios from "axios";
+// import axios from "axios";
+// import Cookies from 'js-cookies';
 import { createStore } from "vuex";
+// import SweetAlert from '@/mixins/sweet-alert';
+// const axiosInstance = axios.create({
+//   baseURL: 'http://192.168.1.183:8000/api/', // Your base URL
+// });
+import axiosInstance from "@/axiosInstance";
 
+const token = localStorage.getItem('token')
 export default createStore({
   state: {
-    purchaseOrders: [],
-    // purchases: [],
-    // saleOrder: [],
+    newOrders: [],
+    filteredOrders: [],
     stocks: [],
     stock: {},
-    ledgerEntries: [
-      {
-        date: '23 Dec 23', order: 10000, ready: '', demand: '',
-        color: [
-          {
-            img: 'https://fabricpandit.com/cdn/shop/files/fabric-pandit-fabric-peacock-blue-color-plain-cotton-satin-fabric-width-42-inches-36447076286639_1400x.jpg?v=1686052205',
-            qty: 5000
-          },
-          {
-            img: "https://recovo.co/wp-content/uploads/2023/04/portadas-NEWSLETTER-98.jpg",
-            qty: 5000
-          },
-        ]
-      },
-      {
-        date: '24 Dec 23', order: 5000, ready: '', demand: '',
-        color: [
-          {
-            img: 'https://fabricpandit.com/cdn/shop/files/fabric-pandit-fabric-peacock-blue-color-plain-cotton-satin-fabric-width-42-inches-36447076286639_1400x.jpg?v=1686052205',
-            qty: 2500
-          },
-          {
-            img: "https://recovo.co/wp-content/uploads/2023/04/portadas-NEWSLETTER-98.jpg",
-            qty: 2500
-          },
-        ]
-      },
-      {
-        date: '25 Dec 23', order: '', ready: 6000, demand: '',
-        color: [
-          {
-            img: 'https://fabricpandit.com/cdn/shop/files/fabric-pandit-fabric-peacock-blue-color-plain-cotton-satin-fabric-width-42-inches-36447076286639_1400x.jpg?v=1686052205',
-            qty: 3000
-          },
-          {
-            img: "https://recovo.co/wp-content/uploads/2023/04/portadas-NEWSLETTER-98.jpg",
-            qty: 3000
-          },
-        ]
-      },
-      {
-        date: '26 Dec 23', order: '', ready: '', demand: 3000,
-        color: [
-          {
-            img: 'https://fabricpandit.com/cdn/shop/files/fabric-pandit-fabric-peacock-blue-color-plain-cotton-satin-fabric-width-42-inches-36447076286639_1400x.jpg?v=1686052205',
-            qty: 1500
-          },
-          {
-            img: "https://recovo.co/wp-content/uploads/2023/04/portadas-NEWSLETTER-98.jpg",
-            qty: 1500
-          },
-        ]
-      },
-    ],
     ledgers: [],
-    activeEntry: {}
+    dispatches: [],
+    fabricator: {},
+    activeEntry: {},
+    action: false,
+    sales: [],
+    dashboard: [],
+    ledgerChats: {
+      chats: [],
+      ledger: {},
+      pagination: {}
+    },
   },
   getters: {
-    getpurchaseOrders: state => state.purchaseOrders,
-    // getSaleOrder: state => state.saleOrder,
+    getNewOrders(state) {
+      return state.newOrders
+    },
+    getFilteredOrders(state) {
+      return state.filteredOrders
+    },
     getLedgerEntries: state => state.ledgerEntries,
     getActiveEntry: state => state.activeEntry,
-    // getPurchases: state => state.purchases,
     getStocks: state => state.stocks,
     getStock: state => state.stock,
     getLedgers: state => state.ledgers,
+    getLedgerChats: state => state.ledgerChats,
+    getDispatches: state => state.dispatches,
+    getFabricator: state => state.fabricator,
+    getSales: state => state.sales,
+    getDashboard: state => state.dashboard,
   },
   mutations: {
-    PurchaseOrder(state, data) {
-      state.purchaseOrders = data
+    actionDone(state) {
+      state.action = true;
     },
-    // saleOrder(state, data) {
-    //   state.saleOrder = data
-    // },
-    // setPurchases(state, data) {
-    //   state.purchases = data
-    // },
+    setNewOrders(state, data) {
+      state.newOrders = data
+    },
+    setFilteredOrders(state, data) {
+      state.filteredOrders = data
+    },
     setStocks(state, data) {
       state.stocks = data
     },
@@ -94,60 +64,107 @@ export default createStore({
     setLedgers(state, data) {
       state.ledgers = data
     },
+    setLedgerChats(state, data) {
+      state.ledgerChats.ledger = data.ledger;
+      state.ledgerChats.pagination = data.pagination;
+      state.ledgerChats.chats = [...data.chats, ...state.ledgerChats.chats];
+    },
+    setLedgerChat(state, data) {
+      state.ledgerChats.chats = data.chats;
+    },
+    setDispatches(state, data) {
+      state.dispatches = data
+    },
+    setSales(state, data) {
+      state.sales = data
+    },
+    setDashboard(state, data) {
+      state.dashboard = data
+    },
+    setFabricator(state, data) {
+      state.fabricator = data
+    },
     showActiveEntry(state, data) {
       state.activeEntry = data
     },
     hideActiveEntry(state) {
       state.activeEntry = {}
-    }
+    },
   },
   actions: {
-    fetchpurchaseOrders({ commit }) {
-      const token = localStorage.getItem('token')
-      axios.get('http://192.168.1.133:8001/api/orders', {
+
+    // Fetch issued or Accepted order
+    fetchNewOrders({ commit }) {
+      console.log('hit');
+      // const token = Cookies.get('token'); 
+      axiosInstance.get('orders', {
         headers: { "Authorization": `Bearer ${token}` }
       })
         .then(response => {
           if (response.data.status === 'ok') {
-            commit('PurchaseOrder', response.data.data)
+            commit('setNewOrders', response.data.data)
           } else if (response.data.status === 'error') {
             alert(response.data.message);
           } else {
             alert('Something went wrong! Please try again');
           }
         })
-        .catch((error) => { console.error('fetchpurchaseOrders:', error) })
+        .catch((error) => { console.error('fetchOrders:', error) })
     },
-    // fetchSaleOrder({ commit }, data) {
-    //   axios.get('http://192.168.1.133:8003/api/saleorder/' + data.jwoId + '/' + data.fabId)
-    //     .then(response => {
-    //       // commit('saleOrder', response.data.data)
-    //       if (response.data.status === 'ok') {
-    //         console.log('test', response.data.data)
-    //         commit('saleOrder', response.data.data)
-    //       } else if (response.data.status === 'error') {
-    //         alert(response.data.message)
-    //       } else {
-    //         alert('Something went wrong! Please try again')
-    //       }
-    //     })
-    //     .catch((error) => { console.error('fetchSaleOrder', error) })
-    // },
-    // fetchPurchases({ commit }) {
-    //   axios.get('http://192.168.1.133:8001/api/purchases')
-    //     .then(response => {
-    //       if (response.data.status === 'ok') {
-    //         commit('setPurchases', response.data.data)
-    //       } else if (response.data.status === 'error') {
-    //         alert(response.data.message)
-    //       } else {
-    //         alert('Something went wrong! Please try again')
-    //       }
-    //     })
-    // },
+
+    fetchFilteredOrders({ commit }, data) {
+      console.log('hit');
+      axiosInstance.get('orders?status=' + data.status, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+        .then(response => {
+          if (response.data.status === 'ok') {
+            commit('setFilteredOrders', response.data.data)
+          } else if (response.data.status === 'error') {
+            alert(response.data.message);
+          } else {
+            alert('Something went wrong! Please try again');
+          }
+        })
+        .catch((error) => { console.error('fetchOrders:', error) })
+    },
+
+    // Accept or Reject Order
+    orderAction({ commit }, data) {
+      axiosInstance
+        .put('orders/' + data.sid, {
+          status: data.status,
+          content: data.content,
+          expected_at: data.expected_at,
+        }, { headers: { Authorization: `Bearer ${token}` } })
+        .then((response) => {
+          if (response.status === 'pending') {
+            commit('actionDone')
+          }
+        })
+        .catch((error) => {
+          console.error('acceptPurchaseOrder:', error);
+        })
+    },
+
+    fetchDispatches({ commit }) {
+      axiosInstance.get('dispatches', {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+        .then(response => {
+          if (response.data.status === 'ok') {
+            commit('setDispatches', response.data.data)
+          } else if (response.data.status === 'error') {
+            alert(response.data.message);
+          } else {
+            alert('Something went wrong! Please try again');
+          }
+        })
+        .catch((error) => { console.error('fetchOrders:', error) })
+    },
+
     fetchStocks({ commit }) {
-      const token = localStorage.getItem('token')
-      axios.get('http://192.168.1.133:8001/api/stocks', {
+      axiosInstance.get('mystocks', {
         headers: { "Authorization": `Bearer ${token}` }
       }).then((response) => {
         if (response.data.status === 'ok') {
@@ -159,32 +176,121 @@ export default createStore({
         }
       })
     },
-    fetchStock({ commit }, data) {
-      const token = localStorage.getItem('token')
-      axios.get('http://192.168.1.133:8001/api/stocks/' + data, {
-        headers: { "Authorization": `Bearer ${token}` }
-      }).then((response) => {
-        if (response.data.status === 'ok') {
-          commit('setStock', response.data.data)
-        } else if (response.data.status === 'error') {
-          alert(response.data.message)
-        } else {
-          alert('Something went wrong! Please try again')
-        }
-      })
-    },
-    fetchLedgers({ commit }, data) {
-      const token = localStorage.getItem('token')
-      axios.get('http://192.168.1.133:8001/api/ledgers', {
-        params: { product_sid: data },
+
+    fetchStockLedger({ commit }, payload) {
+      const page = payload.page || 1;
+      axiosInstance.get(`ledgers/${payload.ledger_sid}?page=${page}`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
         .then((response) => {
-          commit('setLedgers', response.data.data)
+          commit('setLedgers', response.data.data);
         })
         .catch((error) => {
           console.error('Error fetching ledger:', error);
         });
+    },
+
+    fetchLedgerChats({ commit }, payload) {
+      const page = payload.page || 1;
+      axiosInstance.get(`chats/${payload.ledger_sid}?page=${page}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      }).then((response) => {
+        if (response.data.status === 'ok') {
+          commit('setLedgerChats', response.data.data)
+        } else if (response.data.status === 'error') {
+          alert(response.data.message);
+        } else {
+          alert('Something went wrong! Please try again');
+        }
+      });
+    }, 
+    reloadLedgerChats({ commit }, payload) {
+      axiosInstance.get(`chats/${payload.ledger_sid}?page=1`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      }).then((response) => {
+        if (response.data.status === 'ok') {
+          commit('setLedgerChat', response.data.data)
+        } else if (response.data.status === 'error') {
+          alert(response.data.message);
+        } else {
+          alert('Something went wrong! Please try again');
+        }
+      });
+    },
+
+    postAdjustment({ commit }, data) {
+      axiosInstance.post('adjustments', data,
+        { headers: { "Authorization": `Bearer ${token}` } })
+        .then((response) => {
+          if (response.status === 'ok') {
+            commit('actionDone')
+          }
+        })
+        .catch((error) => {
+          console.error('postAdjustment:', error);
+        })
+    },
+    postReady({ commit }, data) {
+      axiosInstance.post('readies', data,
+        { headers: { "Authorization": `Bearer ${token}` } })
+        .then((response) => {
+          if (response.status === 'pending') {
+            commit('actionDone')
+          }
+        })
+        .catch((error) => {
+          console.error('acceptPurchaseOrder:', error);
+        })
+    },
+
+    postDispatch({ commit }, data) {
+      axiosInstance.post('dispatches', data,
+        { headers: { "Authorization": `Bearer ${token}` } })
+        .then((response) => {
+          if (response.status === 'pending') {
+            commit('actionDone')
+          }
+        })
+        .catch((error) => {
+          console.error('acceptPurchaseOrder:', error);
+        })
+
+    },
+
+    fetchSales({ commit }) {
+      axiosInstance.get('purchases', {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+        .then((response) => {
+          if (response.data.status === 'ok') {
+            commit('setSales', response.data.data)
+          } else if (response.data.status === 'error') {
+            alert(response.data.message)
+          } else {
+            alert('Something went wrong! Please try again')
+          }
+        })
+        .catch((error) => {
+          console.error('fetchSales:', error);
+        })
+    },
+
+    fetchDashboard({ commit }) {
+      axiosInstance.get('dashboard', {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+        .then((response) => {
+          if (response.data.status === 'ok') {
+            commit('setDashboard', response.data.data)
+          } else if (response.data.status === 'error') {
+            alert(response.data.message)
+          } else {
+            alert('Something went wrong! Please try again')
+          }
+        })
+        .catch((error) => {
+          console.error('fetchDashboard:', error);
+        })
     },
     showActiveEntry({ commit }, data) {
       commit('showActiveEntry', data)
@@ -192,6 +298,13 @@ export default createStore({
     hideActiveEntry({ commit }, data) {
       commit('hideActiveEntry', data)
     },
+    statusCheck({ commit }, data) {
+      commit('statusCheck', data)
+    },
+    test111({ commit }, data) {
+      alert(data)
+      commit('statusCheck', data)
+    }
   },
   modules: {},
 });

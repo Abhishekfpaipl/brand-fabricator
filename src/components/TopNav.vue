@@ -2,9 +2,6 @@
     <nav class="navbar top-brand border-bottom">
         <div class="container-fluid">
             <span class="navbar-brand text-white">{{ formattedPageTitle }}</span>
-            <router-link to="/profile" class="text-dark">
-                <i class="bi bi-person-fill text-white fs-5"></i>
-            </router-link>
         </div>
     </nav>
 </template>

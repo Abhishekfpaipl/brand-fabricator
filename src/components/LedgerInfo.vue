@@ -50,16 +50,6 @@ export default {
     async mounted() {
         this.loadActiveLedger(); 
     },
-    // watch: {
-    //     ledgerItems: {
-    //         immediate: true,
-    //         handler(newVal, oldVal) {
-    //             if (newVal && newVal.length > 0) {
-    //                 console.log('Contents of this.ledgerItems:', [newVal, oldVal]);
-    //             }
-    //         },
-    //     },
-    // },
     methods: {
         loadActiveLedger() {
             const ledgerInfoModal = document.getElementById('ledgerInfoModal')

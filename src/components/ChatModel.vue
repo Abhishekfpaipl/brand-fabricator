@@ -286,17 +286,6 @@ export default {
             this.fileType = this.isImage ? 'image' : 'pdf';
             this.previewUrl = URL.createObjectURL(file);
         },
-
-        // async loadAllChats() {
-        //     await axios.get('http://192.168.1.133:8001/api/chats?ledger_sid=DG-L-0001', {
-        //         headers: {
-        //             'Accept': 'application/json',
-        //         }
-        //     })
-        //         .then((response) => {
-        //             this.chats = response.data.data
-        //         });
-        // },
         toggleRecording() {
             if (this.isRecording) {
                 this.stopRecording();

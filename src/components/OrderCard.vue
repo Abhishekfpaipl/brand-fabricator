@@ -32,19 +32,12 @@
 <script>
 export default {
     name: "OrderCard",
-    props: ['order', 'orderIndex'],
-    data() {
-        return {
-            error: '',
-            message: 'Order Accepted',
-        };
-    },
+    props: ['order', 'orderIndex'], 
     methods: {
         orderAction(order, status) {
             this.$store.dispatch('orderAction', {
                 status: status,
                 sid: order.sid,
-                message: this.message,
                 expected_at: order.expected_at
             })
         },

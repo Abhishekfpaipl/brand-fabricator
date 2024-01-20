@@ -31,23 +31,6 @@ export default {
   },
   mounted() {
     this.$store.dispatch('fetchFilteredOrders', { status: 'accepted' });
-  },
-  // methods: {
-  //     procurePo(poSid) {
-  //         const token = localStorage.getItem('token');
-  //         const postData = { order_sid: poSid };
-  //         this.action = 'Procuring';
-  //         axiosInstance.post('procurement/check', postData, {
-  //             headers: { "Authorization": `Bearer ${token}` }
-  //         }).then((response) => {
-  //             if (response.data.status) {
-  //                 this.action = 'Procured';
-  //             }
-  //         }).catch((error) => {
-  //             console.error("Error during procurement check:", error);
-  //             this.action = 'Procure';
-  //         });
-  //     }
-  // },
+  }, 
 }
 </script>

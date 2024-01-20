@@ -19,9 +19,6 @@
             <div class="offcanvas-body">
                 <div class="pb-5 mb-5">
                     <ImageUploadBox></ImageUploadBox>
-                    <!-- <div class="text-center">
-                        <img :src="fabricator.image" class="rounded-0" style="width: 100%; height: 300px; object-fit: cover;">
-                    </div> -->
                     <div class="container">
                         <table class="table table-bordered">
                             <tbody class="table-light">

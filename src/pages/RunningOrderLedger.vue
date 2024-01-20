@@ -16,7 +16,7 @@
                 </thead>
                 <tbody v-if="ledger.items">
                     <tr v-for="(ledgerItem, ledgerItemIndex) in filteredLedgerItems" :key="ledgerItemIndex"
-                        v-show="filters[ledgerItem.model]" data-bs-toggle="offcanvas" data-bs-target="#ledgerInfoModal"
+                        v-show="shouldShow(ledgerItem)" data-bs-toggle="offcanvas" data-bs-target="#ledgerInfoModal"
                         :data-bs-ledgermodelsid="ledgerItem.model_sid" aria-controls="ledgerInfoModal">
                         <td class="ps-3 text-start">{{ formatDate(ledgerItem.created_at) }}</td>
                         <td colspan="3" class="pe-3" :class="[
@@ -32,13 +32,13 @@
                     <tr class="table-dark">
                         <td class="ps-3 text-start fw-bold" style="min-width: 90px;">Total</td>
                         <td class="text-start" style="min-width: 90px;">
-                            {{ calculateTotalOrder('order', ledger.items.data, 'accepted') }}
+                            {{ calculateTotal('order').toLocaleString() }}
                         </td>
                         <td class="text-center" style="min-width: 90px;">
-                            {{ calculateTotal('ready', ledger.items.data).toLocaleString() }}
+                            {{ calculateTotal('ready').toLocaleString() }}
                         </td>
                         <td class="pe-3 text-end" style="min-width: 90px;">
-                            {{ calculateTotal('demand', ledger.items.data).toLocaleString() }}
+                            {{ calculateTotal('demand').toLocaleString() }}
                         </td>
                     </tr>
                 </tfoot>
@@ -104,101 +104,21 @@
         </table>
 
         <div v-if="ledger.balance_qty">
-
             <form class="px-3" v-if="addReady" @submit.prevent="postReady()" method="post">
-
-                <div class="row mb-2">
-                    <div class="col-6 text-center text-bg-dark p-1">Add Ready Quantity</div>
-                    <div class="col-6">
-                        <label class="btn btn-outline-dark rounded-0 w-100" :class="{ active: adjustment }"
-                            @click="toggleAdjustment('ready')">
-                            <input type="checkbox" autocomplete="off" v-model="adjustment"> Adjustment
-                        </label>
-                    </div>
-                </div>
-
-                <textarea class="form-control" v-model="content" placeholder="Enter your message ..."></textarea>
-
-                <div v-if="ledger.stock.product" class="d-flex flex-wrap gap-2 mb-2">
-                    <div class="d-flex w-100" v-for="(color, index) in ledger.stock.product.options" :key="index">
-                        <button class="btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                            <img :src="color.image" class="rounded me-2" style="height: 60px; object-fit: cover">
-                        </button>
-                        <div class="flex-fill form-floating overflow-hidden">
-                            <input type="number" class="form-control" :id="'colorQuantity_' + color.sid"
-                                v-model="color.quantity" @input="handleInput(color)" />
-                            <label class="text-capitalize" :for="'colorQuantity_' + color.sid">
-                                {{ color.name }} Color
-                            </label>
-                        </div>
-                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-fullscreen">
-                                <div class="modal-content">
-                                    <button class="btn h-100" data-bs-dismiss="modal" aria-label="Close">
-                                        <img :src="color.image" class="h-100"
-                                            style="object-fit: cover; object-position: center;">
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn btn-warning fw-bold w-100" type="submit">
-                    <div class="d-flex justify-content-around">
-                        <span>Submit</span>
-                        <span>{{ totalColorInputAmount.toLocaleString() }} pcs</span>
-                    </div>
-                </button>
-
+                <LedgerReadyDispatchForm :product="ledger.stock.product" :adjustmentCheck=true title="Add Ready Quantity"
+                    placeholder="Enter your message ..." @formData="handleFormData" />
+                <button class="btn btn-warning fw-bold w-100" type="submit"> Submit </button>
             </form>
 
             <form class="px-3" v-if="addDispatch" @submit.prevent="postDispatch()" method="post">
-
-                <div class="text-center mb-3 text-bg-dark p-1">Add Dispatch Quantity</div>
-
-                <textarea class="form-control" v-model="contentDisptach"
-                    placeholder="Enter Invoice No. & Delivery Challan No."></textarea>
-
-                <div v-if="ledger.stock.product" class="d-flex flex-wrap gap-2 mb-2">
-                    <div class="d-flex w-100" v-for="(color, index) in ledger.stock.product.options" :key="index">
-                        <button class="btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                            <img :src="color.image" class="rounded me-2" style="height: 60px; object-fit: cover">
-                        </button>
-                        <div class="flex-fill form-floating overflow-hidden">
-                            <input type="number" class="form-control" :id="'colorQuantity_' + color.sid"
-                                v-model="color.quantity" @input="handleInput(color)" />
-                            <label class="text-capitalize" :for="'colorQuantity_' + color.sid">
-                                {{ color.name }} Color
-                            </label>
-                        </div>
-                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-fullscreen">
-                                <div class="modal-content">
-                                    <button class="btn h-100" data-bs-dismiss="modal" aria-label="Close">
-                                        <img :src="color.image" class="h-100"
-                                            style="object-fit: cover; object-position: center;">
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn btn-warning fw-bold w-100" type="submit">
-                    <div class="d-flex justify-content-around">
-                        <span>Submit</span>
-                        <span>{{ totalColorInputAmount.toLocaleString() }} pcs</span>
-                    </div>
-                </button>
-
+                <LedgerReadyDispatchForm :product="ledger.stock.product" :adjustmentCheck=false
+                    title="Add Dispatch Quantity" placeholder="Enter Invoice No. & Delivery Challan No."
+                    @formData="handleFormData" />
+                <button class="btn btn-warning fw-bold w-100" type="submit">Submit</button>
             </form>
-
         </div>
 
-        <router-link v-else class="btn btn-warning" to="/new-orders">
+        <router-link v-else class="btn btn-warning w-100" to="/new-orders">
             Accept the Order First
         </router-link>
 
@@ -215,23 +135,22 @@ import Swal from 'sweetalert2';
 import LedgerFilters from '@/components/LedgerFilters.vue';
 import ChatButton from '@/components/ChatButton.vue';
 import LedgerInfo from '@/components/LedgerInfo.vue';
+import LedgerReadyDispatchForm from '@/components/forms/LedgerReadyDispatch.vue'
 export default {
-    name: 'CatalogLedger',
+    name: 'RunningOrderLedger',
     components: {
         LedgerFilters,
         ChatButton,
         LedgerInfo,
+        LedgerReadyDispatchForm,
     },
     data() {
         return {
             filters: [],
+            formData: [],
             addReady: false,
             addDispatch: false,
-            content: '',
-            contentDisptach: null,
-            entryVisible: true,
-            adjustment: false,
-            adjustmentType: null,
+            total: 0,
             activePage: 1,
         }
     },
@@ -253,12 +172,6 @@ export default {
         activeEntry() {
             return this.$store.getters.getActiveEntry
         },
-        totalColorInputAmount() {
-            if (this.ledger.stock.product) {
-                return this.ledger.stock.product.options.reduce((total, color) => total + parseInt(color.quantity || 0), 0);
-            }
-            return 0;
-        },
     },
     methods: {
         loadLedgers(pageurl, firstload) {
@@ -270,9 +183,6 @@ export default {
             this.$store.dispatch('fetchStockLedger', {
                 ledger_sid: this.$route.params.ledger_sid, page: this.activePage
             })
-        },
-        toggleAdjustment(type) {
-            this.adjustmentType = type;
         },
         showAddReady() {
             this.addDispatch = false;
@@ -320,29 +230,30 @@ export default {
                 'text-dark': order.status === 'accepted',
             };
         },
-        calculateTotal(model, items) {
-            if (items && Array.isArray(items)) {
-                const filteredItems = items.filter((order) => order.model === model && this.filters[model]);
-                return filteredItems.reduce((total, order) => total + order.quantity, 0);
+        shouldShow(ledgerItem) {
+            let result = this.filters[ledgerItem.model];
+            if (ledgerItem.model === 'adjustment') {
+                return  result && this.filters[ledgerItem.type];
             } else {
-                return 0;
+                return result;
             }
         },
-        calculateTotalOrder(model, items, status) {
-            if (items && Array.isArray(items)) {
-                const filteredItems = items.filter((order) => (order.model === model) && this.filters[model] && (order.status === status));
-                return filteredItems.reduce((total, order) => total + order.quantity, 0);
-            } else {
+        calculateTotal(model) {
+            // Check for the necessary conditions using optional chaining
+            if (!this.ledger?.items?.data || !Array.isArray(this.ledger.items.data) || !this.filters[model]) {
                 return 0;
             }
-        },
-        calculateTotalOrderAdj(type, items, model) {
-            if (items && Array.isArray(items)) {
-                const filteredItems = items.filter((item) => (item.model === type) && this.filters['adj-' + type] && (item.type === model));
-                return filteredItems.reduce((total, item) => total + item.quantity, 0);
-            } else {
-                return 0;
-            }
+
+            // Use reduce directly without a separate filter step
+            return this.ledger.items.data.reduce((total, item) => {
+                // Add item quantity if the item matches the model or is an adjustment of the same type
+                if (item.model === model) {
+                    return total + item.quantity;
+                } else if(item.model === 'adjustment' && item.type === model && this.filters['adjustment']) {
+                    return total - item.quantity;
+                }
+                return total; // Otherwise, keep the total unchanged
+            }, 0);
         },
         formatDate(dateTimeString) {
             const options = {
@@ -353,76 +264,73 @@ export default {
             const formattedTime = new Date(dateTimeString).toLocaleDateString('en-US', options);
             return formattedTime;
         },
-        showActiveEntry(entry) {
-            this.$store.dispatch('showActiveEntry', entry)
-        },
-        hideActiveEntry(entry) {
-            this.$store.dispatch('hideActiveEntry', entry);
-        },
         postReady() {
-            if (this.ledger.stock.product.options && this.totalColorInputAmount > 0) {
-                const quantities = this.ledger.stock.product.options.map(color => {
+            if (this.ledger.stock.product.options && this.total > 0) {
+                const quantities = this.ledger.stock.product.options.map((color, index) => {
                     return this.ledger.stock.product.ranges.map(size => {
                         const key = `${color.sid}_${size.sid}`;
-                        const value = color.quantity;
+                        const value = this.formData.quantity[index];
                         return { [key]: value };
                     });
                 }).flat();
-                if (this.adjustment) {
-
+                if (this.formData.adjustment) {
                     const adjustmentData = {
                         ledger_sid: this.ledger.sid,
-                        note: this.content,
-                        type: this.adjustmentType,
+                        content: this.formData.content,
+                        type: 'ready',
                         quantities: JSON.stringify(quantities),
                     };
                     this.$store.dispatch('postAdjustment', adjustmentData)
                 } else {
-                    const isQuantityValid = this.totalColorInputAmount <= this.ledger.readyable_qty;
+                    const isQuantityValid = this.total <= this.ledger.readyable_qty;
                     if (!isQuantityValid) {
                         console.log('check', isQuantityValid);
                         this.showQtyError('Oops', 'Quantity must be equal or less than Readyable Quantity!');
-                        this.ledger.stock.product.options.forEach(color => {
-                            color.quantity = 0;
+                        this.ledger.stock.product.options.forEach((color, index) => {
+                            console.log(color)
+                            this.testData.quantity[index] = 0;
                         });
                         return;
                     }
                     const orderData = {
                         ledger_sid: this.ledger.sid,
-                        content: this.content,
+                        content: this.formData.content,
                         quantities: JSON.stringify(quantities),
                     };
-                    this.$store.dispatch('postReady', orderData)
+                    this.$store.dispatch('postReady', orderData).then(() => {
+                        this.formData.content = ''
+                    })
                 }
             } else {
                 console.log('Quantity total is 0 or less or ledger is empty. Skipping post request.');
             }
         },
         postDispatch() {
-            if (this.ledger.stock.product.options && this.totalColorInputAmount > 0) {
-                const isQuantityValid = this.totalColorInputAmount <= this.ledger.dispatchable_qty;
+            if (this.ledger.stock.product.options && this.total > 0) {
+                const isQuantityValid = this.total <= this.ledger.dispatchable_qty;
 
                 if (!isQuantityValid) {
                     console.log('check', isQuantityValid);
                     this.showQtyError('Oops', 'Dispatch Quantity must be equal or less than Dispatchable Quantity!');
-                    this.ledger.stock.product.options.forEach(color => {
-                        color.quantity = 0;
+                    this.ledger.stock.product.options.forEach((color, index) => {
+                        console.log(color)
+                        this.this.formData.quantity[index] = 0;
                     });
                     return; // Do not proceed if quantity is invalid
                 }
 
 
-                const quantities = this.ledger.stock.product.options.map(color => {
+                const quantities = this.ledger.stock.product.options.map((color, index) => {
                     return this.ledger.stock.product.ranges.map(size => {
                         const key = `${color.sid}_${size.sid}`;
-                        const value = color.quantity;
+                        const value = this.formData.quantity[index];
                         return { [key]: value };
                     });
                 }).flat();
 
                 const postData = {
                     ledger_sid: this.ledger.sid,
-                    content: this.contentDisptach,
+                    content: this.formData.content,
                     quantities: JSON.stringify(quantities),
                 };
 
@@ -440,6 +348,11 @@ export default {
         },
         handleFiltersChange(filters) {
             this.filters = filters;
+        },
+        handleFormData(data) {
+            console.log('handling', data)
+            this.formData = data.data;
+            this.total = data.total;
         }
     },
 }

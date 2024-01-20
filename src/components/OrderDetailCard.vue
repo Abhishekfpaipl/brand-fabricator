@@ -60,12 +60,13 @@
   
 <script>
 export default {
-    name: "OrderCard",
+    name: "OrderDetailCard",
     props: ['orders'],
     data() {
         return {
             activeOrder: {},
             content:'',
+            error:''
         };
     },
     async mounted() {
